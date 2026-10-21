@@ -1,5 +1,5 @@
 // Breach Point offline cache. Bump VERSION whenever index.html changes so phones pick up the update.
-const VERSION='bp-v5';
+const VERSION='bp-v8';
 const PRECACHE=[
  "./",
  "index.html",
