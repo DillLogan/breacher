@@ -1,150 +1,58 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Breach Point</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <div id="unity-fullscreen-container">
-        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
-        <div id="unity-loading-container">
-          <div id="unity-loading-bar">
-            <div id="unity-logo"></div>
-            <div id="unity-progress-bar-empty">
-              <div id="unity-progress-bar-full"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Breach Point</div>
-      </div>
-    </div>
-    <script>
-      let canvas = document.querySelector("#unity-canvas");
-      let fullscreenContainer = document.querySelector("#unity-fullscreen-container");
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Downloads.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/Downloads.data.unityweb",
-        frameworkUrl: buildUrl + "/Downloads.framework.js.unityweb",
-        codeUrl: buildUrl + "/Downloads.wasm.unityweb",
-        streamingAssetsUrl: "StreamingAssets",
-
-        // If you have a custom web site structure, or want to place multiple Unity build instances on the same page,
-        // you can pass fullscreenElementID: "my-unity-fullscreen-container-id", in this configuration field to
-        // explicitly point to the element tree root that is displayed in fullscreen mode.
-        fullscreenElementID: "unity-fullscreen-container",
-
-        companyName: "DefaultCompany",
-        productName: "Breach Point",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
-      };
-
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas container in a window that can be maximized to fullscreen:
-        fullscreenContainer.style.width = "960px";
-        fullscreenContainer.style.height = "600px";
-      }
-
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        const loadingContainer = document.querySelector("#unity-loading-container");
-        const progressBarFull = document.querySelector("#unity-progress-bar-full");
-
-        createUnityInstance(canvas, config, (progress) => {
-          if (progress < 1) {
-            loadingContainer.style.display = "block";
-            progressBarFull.style.width = 100 * progress + "%";
-          } else {
-            loadingContainer.style.display = "none";
-          }
-        }).then((unityInstance) => {
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-
-              }).catch((message) => {
-                alert(message);
-              });
-            };
-
-      document.body.appendChild(script);
-
-    </script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0b0d10">
+  <title>Breach Point</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0d10; }
+    #unity-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; background: #0b0d10; touch-action: none; outline: none; }
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #e6e8ea; font: 600 15px/1.2 system-ui, -apple-system, Segoe UI, sans-serif; letter-spacing: 0.28em; }
+    #bar { width: min(320px, 64vw); height: 3px; background: rgba(255,255,255,0.12); }
+    #fill { height: 100%; width: 0; background: #fff; transition: width 0.2s; }
+    #note { font-weight: 400; letter-spacing: 0.04em; font-size: 12px; color: rgba(230,232,234,0.55); }
+    #err { position: fixed; left: 16px; right: 16px; bottom: 16px; color: #ff9a9a; font: 13px/1.4 system-ui, sans-serif; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="loader"><div>BREACH POINT</div><div id="bar"><div id="fill"></div></div><div id="note">Loading…</div></div>
+  <div id="err"></div>
+  <script>
+    // The game always fills the browser window (no fixed-size box, no template fullscreen button; use Settings > Screen > Fullscreen or F11).
+    var canvas = document.querySelector("#unity-canvas");
+    var mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var buildUrl = "Build";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/Downloads.data.unityweb",
+      frameworkUrl: buildUrl + "/Downloads.framework.js.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "Breach Point",
+      productVersion: "0.1.0",
+      matchWebGLToCanvasSize: true,
+      // phones: render at up to 1.5x pixel density (full retina resolution costs a lot of GPU memory and frame rate)
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2),
+      // warnings (like GitHub Pages' content-type notice) go to the console, not over the game
+      showBanner: function (msg, type) { if (type === "error") document.getElementById("err").textContent = msg; else console.warn(msg); }
+    };
+    config.codeUrl = buildUrl + "/Downloads.wasm.unityweb";
+    var script = document.createElement("script");
+    script.src = buildUrl + "/Downloads.loader.js";
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (p) {
+        document.getElementById("fill").style.width = (100 * p) + "%";
+        document.getElementById("note").textContent = p < 0.9 ? "Loading… " + Math.round(100 * p) + "%" : "Starting…";
+      }).then(function (u) {
+        window.unityInstance = u; document.getElementById("loader").remove();
+      }).catch(function (m) {
+        document.getElementById("err").textContent = "The game couldn't start: " + m + (mobile ? "\n\nOn a phone, close other tabs and apps and reload." : "");
+      });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
 </html>
