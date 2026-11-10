@@ -2,12 +2,14 @@
 <html lang="en-us">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0b0d10">
   <title>Breach Point</title>
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0d10; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0d10;
+      /* every touch belongs to the game: no zooming, scrolling, text selection or long-press menus */
+      touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
     #unity-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; background: #0b0d10; touch-action: none; outline: none; }
     #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #e6e8ea; font: 600 15px/1.2 system-ui, -apple-system, Segoe UI, sans-serif; letter-spacing: 0.28em; }
     #bar { width: min(320px, 64vw); height: 3px; background: rgba(255,255,255,0.12); }
@@ -17,6 +19,28 @@
   </style>
 </head>
 <body>
+  <script>
+    // Remove the old offline cache (service worker) left by the HTML version of the game: it kept serving stale copies of the build.
+    (function () {
+      if (!("serviceWorker" in navigator)) return;
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        var had = regs.length > 0;
+        return Promise.all(regs.map(function (r) { return r.unregister(); })).then(function () {
+          return window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }) : null;
+        }).then(function () { if (had && !sessionStorage.getItem("bp-sw-cleared")) { sessionStorage.setItem("bp-sw-cleared", "1"); location.reload(); } });
+      }).catch(function () {});
+    })();
+  </script>
+  <script>
+    // No zooming: iOS Safari ignores user-scalable=no, so cancel each gesture it would zoom on (double tap, pinch, long press).
+    // preventDefault only stops the browser's own action; the game still receives every touch.
+    (function () {
+      var o = { passive: false, capture: true }, last = 0;
+      ["gesturestart", "gesturechange", "gestureend", "dblclick", "contextmenu", "touchmove"].forEach(function (t) { document.addEventListener(t, function (e) { e.preventDefault(); }, o); });
+      document.addEventListener("wheel", function (e) { if (e.ctrlKey) e.preventDefault(); }, o);
+      document.addEventListener("touchend", function (e) { var n = Date.now(); if (n - last < 350) e.preventDefault(); last = n; }, o);
+    })();
+  </script>
   <canvas id="unity-canvas" tabindex="-1"></canvas>
   <div id="loader"><div>BREACH POINT</div><div id="bar"><div id="fill"></div></div><div id="note">Loading…</div></div>
   <div id="err"></div>
