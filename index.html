@@ -64,8 +64,13 @@
       showBanner: function (msg, type) { if (type === "error") document.getElementById("err").textContent = msg; else console.warn(msg); }
     };
     config.codeUrl = buildUrl + "/Downloads.wasm.unityweb";
+    // Every build uses the same file names, so a browser could pair an old cached file with a new one and crash on start
+    // ("Maximum call stack size exceeded"). Ask the server which build is live and tag every file with it, so the four
+    // files always come from the same build and a new upload is picked up without a hard reload.
+    function start(ver) {
+    config.dataUrl += ver; config.frameworkUrl += ver; config.codeUrl += ver;
     var script = document.createElement("script");
-    script.src = buildUrl + "/Downloads.loader.js";
+    script.src = buildUrl + "/Downloads.loader.js" + ver;
     script.onload = function () {
       createUnityInstance(canvas, config, function (p) {
         document.getElementById("fill").style.width = (100 * p) + "%";
@@ -77,6 +82,14 @@
       });
     };
     document.body.appendChild(script);
+    }
+    var started = false; function go(tag) { if (started) return; started = true; start("?v=" + encodeURIComponent(String(tag).replace(/[^A-Za-z0-9]/g, "").slice(-24) || Date.now())); }
+    try {
+      fetch(buildUrl + "/Downloads.wasm.unityweb", { method: "HEAD", cache: "no-store" })
+        .then(function (r) { go(r.headers.get("etag") || r.headers.get("last-modified") || Date.now()); })
+        .catch(function () { go(Date.now()); });
+      setTimeout(function () { go(Date.now()); }, 6000);
+    } catch (e) { go(Date.now()); }
   </script>
 </body>
 </html>
